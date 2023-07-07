@@ -24,6 +24,6 @@ jobs:
       id-token: write
       packages: read
     steps:
-      - name: Set env vars
+      - name: Set e nv vars
         run: |
           env | sort
