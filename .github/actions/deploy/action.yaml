@@ -2,7 +2,7 @@ name: Deploy
 
 inputs:
   environment:
-    description: 'URL to get the token'
+    description: 'URL to get the token '
     required: true
 
 runs:
