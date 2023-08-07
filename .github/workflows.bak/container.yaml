@@ -1,0 +1,26 @@
+---
+name: Container
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+env:
+  aaaa: ${{ vars.KEY0 }}
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    environment: dev
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Show branch
+        run: |
+          echo GIT_REPO: ${{ github.event.repository.name }}
+          echo GIT_BRANCH: ${{ github.head_ref || github.ref_name }}
+      - name: Show env vars
+        run: |
+          env | sort

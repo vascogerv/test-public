@@ -1,0 +1,53 @@
+---
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+      - stage
+  pull_request:
+    branches:
+      - main
+      - stage
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  select-env:
+    name: Select environment
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check branch
+        id: branch_check
+        run: |
+          echo "Running on branch ${{ github.ref }}"
+          if [[ "${{ github.ref }}" =~ "refs/heads/main".* ]]; then
+              echo "env_name=prod" >> $GITHUB_OUTPUT
+          else
+              echo "env_name=stage" >> $GITHUB_OUTPUT
+          fi
+      - name: Show environment
+        run: echo "I'm using variable ${{ steps.branch_check.outputs.env_name }}"
+    outputs:
+      env_name: ${{ steps.branch_check.outputs.env_name }}
+
+  deploy:
+    name: Deploy
+    needs: [select-env]
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ needs.select-env.outputs.env_name }}
+    env:
+      ENV: ${{ vars.ENV }}
+    steps:
+      - name: Show env vars
+        run: |
+          echo "$ENV"
+      - name: up
+        if: ${{ github.ref == 'refs/heads/main' }}
+        run: |
+          echo "up"
+          echo "$ENV"
