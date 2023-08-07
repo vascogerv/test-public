@@ -1,0 +1,17 @@
+name: Deploy
+
+inputs:
+  environment:
+    description: 'URL to get the token'
+    required: true
+
+runs:
+  using: "composite"
+  environment:
+    name: ${{ input.environment }}
+  env:
+    ENV: ${{ vars.ENV }}
+  steps:
+    - name: Show env vars
+      run: |
+        env | sort
