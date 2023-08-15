@@ -1,0 +1,40 @@
+---
+name: Multi env
+
+on:
+  push:
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  ENV: ${{ vars.ENV }}
+
+jobs:
+  deploy-stage:
+    name: Deploy stage
+    runs-on: ubuntu-latest
+    environment:
+      name: stage
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3.5.3
+      - name: Deploy
+        uses: ./.github/actions/deploy
+        with:
+          working_directory: 00-a
+
+  deploy-prod:
+    name: Deploy prod
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    environment:
+      name: prod
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3.5.3
+      - name: Deploy
+        uses: ./.github/actions/deploy
+        with:
+          working_directory: 01-b

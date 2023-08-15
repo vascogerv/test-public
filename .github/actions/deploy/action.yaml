@@ -1,0 +1,27 @@
+---
+name: Deploy
+
+inputs:
+  working_directory:
+    description: Working Directory
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Show env vars
+      shell: bash
+      working-directory: ${{ inputs.working_directory }}
+      run: |
+        pwd
+        ls -lh
+        echo "$ENV"
+
+    - name: up
+      if: ${{ github.ref == 'refs/heads/stage' || github.ref == 'refs/heads/main' }}
+      shell: bash
+      working-directory: ${{ inputs.working_directory }}
+      run: |
+        pwd
+        ls -lh
+        echo "up"

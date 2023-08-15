@@ -1,0 +1,33 @@
+---
+name: Deploy
+
+on:
+  workflow_run:
+    workflows:
+      - Container
+    types:
+      - completed
+    branches:
+      - main
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    container:
+      image: debian:latest
+    permissions:
+      contents: read
+      id-token: write
+      packages: read
+    steps:
+      - name: Show branch
+        run: |
+          echo GIT_REPO: ${{ github.event.repository.name }}
+          echo GIT_BRANCH: ${{ github.head_ref || github.ref_name }}
+      - name: Show env vars
+        run: |
+          env | sort

@@ -1,0 +1,77 @@
+---
+name: Deploy
+
+on:
+  push:
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  ENV: ${{ vars.ENV }}
+
+jobs:
+  select-env:
+    name: Select environment
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check branch
+        id: branch_check
+        run: |
+          echo "Running on branch ${{ github.ref }}"
+          if [[ "${{ github.ref }}" =~ "refs/heads/main".* ]]; then
+              echo "env_name=prod" >> $GITHUB_OUTPUT
+          else
+              echo "env_name=stage" >> $GITHUB_OUTPUT
+          fi
+      - name: Show environment
+        run: |
+          echo "I'm using: ${{ steps.branch_check.outputs.env_name }}"
+    outputs:
+      env_name: ${{ steps.branch_check.outputs.env_name }}
+
+  deploy-01:
+    name: Deploy 01
+    needs: [select-env]
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ needs.select-env.outputs.env_name }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3.5.3
+      - name: Deploy
+        uses: ./.github/actions/deploy
+        with:
+          working_directory: 00-a
+
+  deploy-02:
+    name: Deploy 02
+    needs: [deploy-01]
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ needs.select-env.outputs.env_name }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3.5.3
+      - name: Deploy
+        uses: ./.github/actions/deploy
+        with:
+          working_directory: 01-b
+
+  # deploy:
+  #   name: Deploy
+  #   needs: [select-env]
+  #   runs-on: ubuntu-latest
+  #   environment:
+  #     name: ${{ needs.select-env.outputs.env_name }}
+  #   env:
+  #     ENV: ${{ vars.ENV }}
+  #   steps:
+  #     - name: Show env vars
+  #       run: |
+  #         echo "$ENV"
+  #     - name: up
+  #       if: ${{ github.ref == 'refs/heads/stage' || github.ref == 'refs/heads/main' }}
+  #       run: |
+  #         echo "up"
