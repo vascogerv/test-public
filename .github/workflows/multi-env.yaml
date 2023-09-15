@@ -1,0 +1,59 @@
+---
+name: Multi env
+
+on:
+  workflow_call:
+    secrets:
+      SECRET_API:
+        required: true
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  ENV: ${{ vars.ENV }}
+
+jobs:
+  deploy-stage:
+    name: Deploy stage
+    runs-on: ubuntu-latest
+    environment:
+      name: stage
+    # Using container blocks inherited secret to this level
+    container:
+      image: python:3.10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3.5.3
+      - run: |
+          echo ${{ secrets.SECRET_API }}
+          echo ${{ secrets.SECRET_API }} | wc -c # 6
+          echo $ENV
+      - name: Deploy
+        uses: ./.github/actions/deploy
+        with:
+          working_directory: 00-a
+          secret-api: ${{ secrets.SECRET_API }}
+
+  deploy-prod:
+    needs: deploy-stage
+    name: Deploy prod
+    runs-on: ubuntu-latest
+    environment:
+      name: prod
+    # Using container blocks inherited secret to this level
+    container:
+      image: python:3.10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3.5.3
+      - run: |
+          echo ${{ secrets.SECRET_API }}
+          echo ${{ secrets.SECRET_API }} | wc -c # 6
+          echo $ENV
+      - name: Deploy
+        uses: ./.github/actions/deploy
+        with:
+          working_directory: 00-a
+          secret-api: ${{ secrets.SECRET_API }}

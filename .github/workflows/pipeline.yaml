@@ -1,0 +1,11 @@
+---
+name: Pipeline
+
+on: # yamllint disable-line rule:truthy
+  push:
+  workflow_dispatch:
+
+jobs:
+  linter:
+    uses: ./.github/workflows/multi-env.yaml
+    secrets: inherit
